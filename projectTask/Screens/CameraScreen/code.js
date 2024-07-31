@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Image, StyleSheet, Text, View, Alert } from 'react-native';
-import { Camera, useCameraDevice  } from 'react-native-vision-camera';
-import CameraRoll from "@react-native-camera-roll/camera-roll";
-import { requestCameraPermission } from './permissions'; // Adjust the import based on your file structure
+import { Camera, useCameraDevice } from 'react-native-vision-camera';
+import { requestCameraPermission } from './permissions'; 
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 const CameraScreen = () => {
   const [photo, setPhoto] = useState(null);
@@ -20,10 +20,17 @@ const CameraScreen = () => {
     };
     getPermission();
   }, []);
+
   const savePhoto = async () => {
     if (photo) {
-      await CameraRoll.save(`file://${photo}`, { type: 'photo' });
-      setPhoto(null);
+      try {
+        const savedPhotoUri = await CameraRoll.save(`file://${photo}`, { type: 'photo' });
+         Alert.alert("Photo Saved");
+        setPhoto(null);
+      } catch (error) {
+        console.error('Error saving photo:', error);
+        Alert.alert("Save Failed", "Failed to save the photo. Please try again.");
+      }
     }
   };
 
@@ -38,6 +45,7 @@ const CameraScreen = () => {
         setPhoto(photo.path);
       } catch (error) {
         console.error('Error taking photo:', error);
+        Alert.alert("Capture Failed", "Failed to take the photo. Please try again.");
       }
     }
   };

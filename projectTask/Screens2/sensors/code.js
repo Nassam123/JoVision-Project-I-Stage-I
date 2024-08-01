@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, Alert, Image, ScrollView } from 'react-native';
 import { requestLocationPermission } from './permissions';
 import Geolocation from '@react-native-community/geolocation';
 import { accelerometer, SensorTypes, setUpdateIntervalForType } from 'react-native-sensors';
@@ -8,11 +8,13 @@ import walk from "./resources/walking.png";
 import sit from "./resources/sitting.png";
 import map from "./resources/map.png";
 
+
 const SensorsScreen = () => {
   const [location, setLocation] = useState(null);
   const [orientation, setOrientation] = useState({ x: 0, y: 0, z: 0 });
   const [hasPermission, setHasPermission] = useState(false);
-  const [speedImage, setSpeedImage] = useState(sit);
+  const [speedImage, setSpeedImage] = useState(map);
+  const [orientationText, setOrientationText] = useState("portrait");
 
   useEffect(() => {
     const getPermissionsAndData = async () => {
@@ -28,9 +30,9 @@ const SensorsScreen = () => {
         Geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude, altitude, speed } = position.coords;
-            console.log('Speed:', speed); 
+            console.log('Speed:', speed);
             setLocation({ latitude, longitude, altitude, speed });
-            updateSpeedImage(speed); 
+            updateSpeedImage(speed);
           },
           (error) => console.log(error),
           { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
@@ -44,6 +46,7 @@ const SensorsScreen = () => {
 
       const subscription = accelerometer.subscribe(({ x, y, z }) => {
         setOrientation({ x, y, z });
+        updateOrientationText(x, y, z);
       });
 
       return () => {
@@ -52,14 +55,36 @@ const SensorsScreen = () => {
       };
     };
 
-   
     const updateSpeedImage = (speed) => {
-      if (speed >= 15) { 
+      if (speed >= 15) {
         setSpeedImage(car);
-      } else if (speed >= 5) { 
+      } else if (speed >= 5) {
         setSpeedImage(walk);
-      } else {
+      } else if (speed < 5) {
         setSpeedImage(sit);
+      }
+    };
+
+  
+    const updateOrientationText = (x, y, z) => {
+      const absX = Math.abs(x);
+      const absY = Math.abs(y);
+      const absZ = Math.abs(z);
+
+      if (absZ > absX && absZ > absY) {
+        if (z > 0) {
+          setOrientationText("portrait");
+        } else {
+          setOrientationText("upsideDown"); 
+        }
+      } else if (absX > absY) {
+        if (x > 0) {
+          setOrientationText("landscapeRight"); 
+        } else {
+          setOrientationText("landscapeLeft"); 
+        }
+      } else {
+        setOrientationText("portrait"); 
       }
     };
 
@@ -76,7 +101,9 @@ const SensorsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <ScrollView>
       <Image source={speedImage} style={styles.image} />
+      <Text style={styles.orientationText}>{orientationText}</Text>
       <Text style={styles.title}>Sensors</Text>
       <View style={styles.section}>
         <Text style={styles.label}>Location:</Text>
@@ -84,7 +111,7 @@ const SensorsScreen = () => {
           <>
             <Text>Latitude: {location.latitude}</Text>
             <Text>Longitude: {location.longitude}</Text>
-            <Text>Altitude: {location.altitude }</Text>
+            <Text>Altitude: {location.altitude}</Text>
             <Text>Speed: {location.speed}</Text>
           </>
         ) : (
@@ -97,7 +124,9 @@ const SensorsScreen = () => {
         <Text>Y: {orientation.y.toFixed(2)}</Text>
         <Text>Z: {orientation.z.toFixed(2)}</Text>
       </View>
+      </ScrollView>
     </View>
+
   );
 };
 
@@ -106,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
-    alignItems: 'center', 
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
@@ -120,6 +149,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   image: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  orientationText: {
     width: 100,
     height: 100,
     marginBottom: 20,

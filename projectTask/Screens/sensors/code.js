@@ -70,8 +70,8 @@ const SensorsScreen = () => {
           <>
             <Text>Latitude: {location.latitude}</Text>
             <Text>Longitude: {location.longitude}</Text>
-            <Text>Altitude: {location.altitude || 'N/A'}</Text>
-            <Text>Speed: {location.speed || 'N/A'}</Text>
+            <Text>Altitude: {location.altitude}</Text>
+            <Text>Speed: {location.speed}</Text>
           </>
         ) : (
           <Text>Loading location...</Text>

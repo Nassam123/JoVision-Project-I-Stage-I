@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
-import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
-import Geolocation from '@react-native-community/geolocation';
+import { View, Text, StyleSheet, Alert, Image } from 'react-native';
 import { requestLocationPermission } from './permissions';
+import Geolocation from '@react-native-community/geolocation';
+import { accelerometer, SensorTypes, setUpdateIntervalForType } from 'react-native-sensors';
+import car from "./resources/car.png";
+import walk from "./resources/walking.png";
+import sit from "./resources/sitting.png";
+import map from "./resources/map.png";
 
 const SensorsScreen = () => {
   const [location, setLocation] = useState(null);
   const [orientation, setOrientation] = useState({ x: 0, y: 0, z: 0 });
   const [hasPermission, setHasPermission] = useState(false);
+  const [speedImage, setSpeedImage] = useState(sit);
 
   useEffect(() => {
     const getPermissionsAndData = async () => {
@@ -22,12 +27,10 @@ const SensorsScreen = () => {
       const fetchLocation = () => {
         Geolocation.getCurrentPosition(
           (position) => {
-            setLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              altitude: position.coords.altitude,
-              speed: position.coords.speed,
-            });
+            const { latitude, longitude, altitude, speed } = position.coords;
+            console.log('Speed:', speed); 
+            setLocation({ latitude, longitude, altitude, speed });
+            updateSpeedImage(speed); 
           },
           (error) => console.log(error),
           { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
@@ -37,7 +40,6 @@ const SensorsScreen = () => {
       fetchLocation();
       const locationInterval = setInterval(fetchLocation, 10000);
 
-     
       setUpdateIntervalForType(SensorTypes.accelerometer, 500);
 
       const subscription = accelerometer.subscribe(({ x, y, z }) => {
@@ -48,6 +50,17 @@ const SensorsScreen = () => {
         clearInterval(locationInterval);
         subscription.unsubscribe();
       };
+    };
+
+   
+    const updateSpeedImage = (speed) => {
+      if (speed >= 15) { 
+        setSpeedImage(car);
+      } else if (speed >= 5) { 
+        setSpeedImage(walk);
+      } else {
+        setSpeedImage(sit);
+      }
     };
 
     getPermissionsAndData();
@@ -63,6 +76,7 @@ const SensorsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Image source={speedImage} style={styles.image} />
       <Text style={styles.title}>Sensors</Text>
       <View style={styles.section}>
         <Text style={styles.label}>Location:</Text>
@@ -70,8 +84,8 @@ const SensorsScreen = () => {
           <>
             <Text>Latitude: {location.latitude}</Text>
             <Text>Longitude: {location.longitude}</Text>
-            <Text>Altitude: {location.altitude || 'N/A'}</Text>
-            <Text>Speed: {location.speed || 'N/A'}</Text>
+            <Text>Altitude: {location.altitude }</Text>
+            <Text>Speed: {location.speed}</Text>
           </>
         ) : (
           <Text>Loading location...</Text>
@@ -92,6 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
+    alignItems: 'center', 
   },
   title: {
     fontSize: 24,
@@ -103,6 +118,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
   },
 });
 

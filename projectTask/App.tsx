@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {StyleSheet,View , Text , Button} from 'react-native';
 import Stage1 from './Screens/Stage1';
+import Stage2 from './Screens2/Stage2';
 
 
 export default class App extends Component {
@@ -11,8 +12,8 @@ export default class App extends Component {
     
       <View style = {style.containers}>
 
-        <Stage1></Stage1>
-
+        {/* <Stage1></Stage1> */}
+            <Stage2></Stage2>       
         </View>
     
      

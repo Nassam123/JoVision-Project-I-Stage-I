@@ -3,8 +3,6 @@ import { View, Text, FlatList, Image, StyleSheet, RefreshControl, TouchableOpaci
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import RNFS from 'react-native-fs';
 import { useNavigation } from '@react-navigation/native';
-import MediaViewer from './MediaViewer';
-
 
 const GalleryScreen = () => {
   const [images, setImages] = useState([]);
@@ -72,7 +70,13 @@ const GalleryScreen = () => {
         <View style={styles.overlay}>
           <Button title="Rename" onPress={() => setModalVisible(true)} />
           <Button title="Delete" onPress={() => deleteImage(item.image.uri)} />
-          <Button title="FullScreen" onPress={() => navigation.navigate('MediaViewer', { item })} />
+          <Button title="FullScreen" onPress={() =>  navigation.navigate('MediaViewerScreen', { 
+                 item: item,
+                mediaList: images, 
+                initialIndex: images.indexOf(item)  
+              })
+            }
+          />
         </View>
       )}
     </TouchableOpacity>

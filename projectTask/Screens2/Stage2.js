@@ -5,9 +5,11 @@ import { NavigationContainer } from "@react-navigation/native";
 import CameraScreen from "./camera/code";
 import SensorsScreen from "./sensors/code";
 import GalleryScreen from "./gallery";
-import MediaViewer from "./MediaViewer";
+import MediaViewerScreen from "./MediaViewer";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 
+const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const Stage2 = () => {
@@ -17,13 +19,22 @@ const Stage2 = () => {
       <Tab.Navigator >
       <Tab.Screen name="Camera" component={CameraScreen} />
         <Tab.Screen name="Sensors" component={SensorsScreen} />
-        <Tab.Screen name="Gallery" component={GalleryScreen} />
-        <Tab.Screen name="Media viewer" component={MediaViewer} options={{ headerShown: false }} />
+        <Tab.Screen name="Gallery" component={GalleryStack} />
+        
         </Tab.Navigator>
     </NavigationContainer>
     </View>
   );
 }
+
+const GalleryStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
+      <Stack.Screen name="MediaViewerScreen" component={MediaViewerScreen} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+};
 
 export default Stage2;
 

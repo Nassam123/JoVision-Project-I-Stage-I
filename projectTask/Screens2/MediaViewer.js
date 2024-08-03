@@ -1,74 +1,88 @@
-import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, FlatList, Image, RefreshControl, Button } from "react-native";
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Image, StyleSheet, Button } from 'react-native';
+import Video from 'react-native-video';
+import { useNavigation, useRoute } from '@react-navigation/native';
+const MediaViewerScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { item, mediaList = [], initialIndex = 0 } = route.params;
 
-const MediaViewer = () => {
-  const [photos, setPhotos] = useState([]);
-  const [index, setIndex] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const flatListRef = useRef(null);
+  const [media, setMedia] = useState(item);
+  const [index, setIndex] = useState(initialIndex);
+  const videoRef = useRef(null);
+
+  // Helper function to check if media is a video
+  const isVideo = (uri) => {
+    const extension = uri.split('.').pop().toLowerCase();
+    const videoExtensions = ['mp4', 'avi', 'mov', 'mkv', 'webm']; // Add other video extensions as needed
+    return videoExtensions.includes(extension);
+  };
 
   useEffect(() => {
-    loadPhotos();
-  }, []);
-
-  useEffect(() => {
-    let interval;
-    if (!paused && photos.length > 0) {
-      interval = setInterval(() => {
-        setIndex((prevIndex) => (prevIndex + 1) % photos.length);
-      }, 1000);
+    if (mediaList.length > 0) {
+      setMedia(mediaList[index]);
     }
-    return () => clearInterval(interval);
-  }, [paused, photos]);
+  }, [index]);
 
   useEffect(() => {
-    if (!paused && flatListRef.current && photos.length > 0) {
-      flatListRef.current.scrollToIndex({ index, animated: true });
+    if (media.isVideo && videoRef.current) {
+      videoRef.current.seek(0);
     }
-  }, [index, paused, photos]);
+  }, [media]);
 
-  const loadPhotos = async () => {
-    try {
-      const result = await CameraRoll.getPhotos({
-        first: 20,
-        assetType: "Photos",
-      });
-      setPhotos(result.edges.map(edge => edge.node.image));
-    } catch (error) {
-      console.log("Error loading photos: ", error);
+  const handlePlayPause = () => {
+    setMedia((prev) => ({ ...prev, isPlaying: !prev.isPlaying }));
+  };
+
+  const handleForward = () => {
+    if (videoRef.current) {
+      videoRef.current.seek(media.currentTime + 5);
     }
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadPhotos();
-    setRefreshing(false);
+  const handleRewind = () => {
+    if (videoRef.current) {
+      videoRef.current.seek(media.currentTime - 5);
+    }
   };
 
-  const handlePauseResume = () => {
-    setPaused(!paused);
+  const handleNext = () => {
+    if (mediaList.length > 0) {
+      setIndex((prevIndex) => (prevIndex + 1) % mediaList.length);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (mediaList.length > 0) {
+      setIndex((prevIndex) => (prevIndex - 1 + mediaList.length) % mediaList.length);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text>Slideshow</Text>
-      <FlatList
-        ref={flatListRef}
-        data={photos}
-        keyExtractor={(item) => item.uri}
-        numColumns={1}
-        renderItem={({ item }) => (
-          <Image source={{ uri: item.uri }} style={styles.image} />
+      {isVideo(media.image.uri) ? (
+        <Video
+          ref={videoRef}
+          source={{ uri: media.image.uri }}
+          style={styles.media}
+          controls={true}
+          paused={!media.isPlaying}
+          onProgress={(data) => setMedia((prev) => ({ ...prev, currentTime: data.currentTime }))}
+        />
+      ) : (
+        <Image source={{ uri: media.image.uri }} style={styles.media} />
+      )}
+      <View style={styles.controls}>
+        {isVideo(media.image.uri) && (
+          <>
+            <Button title={media.isPlaying ? 'Pause' : 'Play'} onPress={handlePlayPause} />
+            <Button title="Forward" onPress={handleForward} />
+            <Button title="Rewind" onPress={handleRewind} />
+          </>
         )}
-        scrollEnabled={paused} 
-      />
-      <Button
-        title={paused ? "Resume Slideshow" : "Pause Slideshow"}
-        onPress={handlePauseResume}
-        style={styles.button}
-      />
+        <Button title="Previous" onPress={handlePrevious} />
+        <Button title="Next" onPress={handleNext} />
+      </View>
     </View>
   );
 };
@@ -76,18 +90,19 @@ const MediaViewer = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  image: {
-    width: 400,
-    height: 800,
-    resizeMode: "cover",
+  media: {
+    width: '100%',
+    height: '80%',
   },
-  button: {
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
     marginTop: 20,
   },
 });
 
-export default MediaViewer;
+export default MediaViewerScreen;

@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import CameraScreen from "./camera/code";
 import SensorsScreen from "./sensors/code";
 import GalleryScreen from "./gallery";
-import SlideshowScreen from "./slideshow";
+import MediaViewer from "./MediaViewer";
 
 
 const Tab = createBottomTabNavigator();
@@ -18,7 +18,7 @@ const Stage2 = () => {
       <Tab.Screen name="Camera" component={CameraScreen} />
         <Tab.Screen name="Sensors" component={SensorsScreen} />
         <Tab.Screen name="Gallery" component={GalleryScreen} />
-        <Tab.Screen name="Slideshow" component={SlideshowScreen} />
+        <Tab.Screen name="Media viewer" component={MediaViewer} options={{ headerShown: false }} />
         </Tab.Navigator>
     </NavigationContainer>
     </View>

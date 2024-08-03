@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, FlatList, Image, RefreshControl, Button } from "react-native";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
-const SlideshowScreen = () => {
+const MediaViewer = () => {
   const [photos, setPhotos] = useState([]);
   const [index, setIndex] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -90,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SlideshowScreen;
+export default MediaViewer;

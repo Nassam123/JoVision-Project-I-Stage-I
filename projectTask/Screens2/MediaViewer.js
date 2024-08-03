@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Image, StyleSheet, Button } from 'react-native';
-import Video from 'react-native-video';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Video from 'react-native-video';
 
 const MediaViewerScreen = () => {
   const navigation = useNavigation();
@@ -12,6 +13,8 @@ const MediaViewerScreen = () => {
   const [index, setIndex] = useState(initialIndex);
   const videoRef = useRef(null);
 
+  const isVideo = (type) => type && type.startsWith('video/');
+
   useEffect(() => {
     if (mediaList.length > 0) {
       setMedia(mediaList[index]);
@@ -19,7 +22,7 @@ const MediaViewerScreen = () => {
   }, [index, mediaList]);
 
   useEffect(() => {
-    if (media.isVideo && videoRef.current) {
+    if (isVideo(media.type) && videoRef.current) {
       videoRef.current.seek(0);
     }
   }, [media]);
@@ -52,11 +55,9 @@ const MediaViewerScreen = () => {
     }
   };
 
-  console.log('Current media:', media); // Debugging statement
-
   return (
     <View style={styles.container}>
-      {media.isVideo ? (
+      {isVideo(media.type)  ? (
         <Video
           ref={videoRef}
           source={{ uri: media.image.uri }}
@@ -69,7 +70,7 @@ const MediaViewerScreen = () => {
         <Image source={{ uri: media.image.uri }} style={styles.media} />
       )}
       <View style={styles.controls}>
-        {media.isVideo && (
+        {isVideo(media.type)  && (
           <>
             <Button title={media.isPlaying ? 'Pause' : 'Play'} onPress={handlePlayPause} />
             <Button title="Forward" onPress={handleForward} />

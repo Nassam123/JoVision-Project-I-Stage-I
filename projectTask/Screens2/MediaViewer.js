@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Image, StyleSheet, Button } from 'react-native';
 import Video from 'react-native-video';
 import { useNavigation, useRoute } from '@react-navigation/native';
+
 const MediaViewerScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -11,18 +12,11 @@ const MediaViewerScreen = () => {
   const [index, setIndex] = useState(initialIndex);
   const videoRef = useRef(null);
 
-  // Helper function to check if media is a video
-  const isVideo = (uri) => {
-    const extension = uri.split('.').pop().toLowerCase();
-    const videoExtensions = ['mp4', 'avi', 'mov', 'mkv', 'webm']; // Add other video extensions as needed
-    return videoExtensions.includes(extension);
-  };
-
   useEffect(() => {
     if (mediaList.length > 0) {
       setMedia(mediaList[index]);
     }
-  }, [index]);
+  }, [index, mediaList]);
 
   useEffect(() => {
     if (media.isVideo && videoRef.current) {
@@ -35,13 +29,13 @@ const MediaViewerScreen = () => {
   };
 
   const handleForward = () => {
-    if (videoRef.current) {
+    if (videoRef.current && media.currentTime != null) {
       videoRef.current.seek(media.currentTime + 5);
     }
   };
 
   const handleRewind = () => {
-    if (videoRef.current) {
+    if (videoRef.current && media.currentTime != null) {
       videoRef.current.seek(media.currentTime - 5);
     }
   };
@@ -58,9 +52,11 @@ const MediaViewerScreen = () => {
     }
   };
 
+  console.log('Current media:', media); // Debugging statement
+
   return (
     <View style={styles.container}>
-      {isVideo(media.image.uri) ? (
+      {media.isVideo ? (
         <Video
           ref={videoRef}
           source={{ uri: media.image.uri }}
@@ -73,7 +69,7 @@ const MediaViewerScreen = () => {
         <Image source={{ uri: media.image.uri }} style={styles.media} />
       )}
       <View style={styles.controls}>
-        {isVideo(media.image.uri) && (
+        {media.isVideo && (
           <>
             <Button title={media.isPlaying ? 'Pause' : 'Play'} onPress={handlePlayPause} />
             <Button title="Forward" onPress={handleForward} />

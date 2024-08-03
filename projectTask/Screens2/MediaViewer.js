@@ -21,12 +21,6 @@ const MediaViewerScreen = () => {
     }
   }, [index, mediaList]);
 
-  useEffect(() => {
-    if (isVideo(media.type) && videoRef.current) {
-      videoRef.current.seek(0);
-    }
-  }, [media]);
-
   const handlePlayPause = () => {
     setMedia((prev) => ({ ...prev, isPlaying: !prev.isPlaying }));
   };

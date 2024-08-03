@@ -71,7 +71,7 @@ const GalleryScreen = () => {
           <Button title="Rename" onPress={() => setModalVisible(true)} />
           <Button title="Delete" onPress={() => deleteImage(item.image.uri)} />
           <Button title="FullScreen" onPress={() =>  navigation.navigate('MediaViewerScreen', { 
-                 item: item,
+                item: item,
                 mediaList: images, 
                 initialIndex: images.indexOf(item)  
               })
